@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: '"Source Han Sans CN"', '"Noto Sans SC"', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    @apply bg-steel-50 text-steel-900 antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-industrial-orange-500 text-white font-medium rounded transition-all duration-300 hover:bg-industrial-orange-600 hover:shadow-lg hover:shadow-industrial-orange-500/30 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 border-2 border-steel-300 text-steel-700 font-medium rounded transition-all duration-300 hover:border-industrial-orange-500 hover:text-industrial-orange-500 active:scale-95;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-steel-900 mb-4;
+  }
+
+  .section-subtitle {
+    @apply text-steel-500 text-lg max-w-2xl mx-auto;
+  }
+
+  .card-industrial {
+    @apply bg-white border border-steel-200 rounded-lg shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+  }
+
+  .spec-table {
+    @apply w-full border-collapse;
+  }
+
+  .spec-table th {
+    @apply bg-space-blue-900 text-white text-left py-3 px-4 font-medium text-sm;
+  }
+
+  .spec-table td {
+    @apply py-3 px-4 border-b border-steel-200 text-sm;
+  }
+
+  .spec-table tr:nth-child(even) td {
+    @apply bg-steel-50;
+  }
+
+  .spec-table tr:hover td {
+    @apply bg-industrial-orange-50;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-grid-dark {
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
