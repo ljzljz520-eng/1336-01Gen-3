@@ -73,7 +73,7 @@ const ProductCard = ({ product, showFullSpec = false }: ProductCardProps) => {
         )}
 
         <Link
-          to={`/products/${product.id}`}
+          to={`/products/${product.category}/${product.id}`}
           className="inline-flex items-center text-industrial-orange-500 font-medium text-sm hover:text-industrial-orange-600 group/link"
         >
           查看详细参数

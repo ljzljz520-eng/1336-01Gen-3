@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import type { ConsultFormData } from '@/types';
 
 interface ContactFormProps {
@@ -30,6 +30,8 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
   const [errors, setErrors] = useState<Partial<Record<keyof ConsultFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submittedId, setSubmittedId] = useState<number | null>(null);
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof ConsultFormData, string>> = {};
@@ -72,6 +74,9 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
     if (errors[name as keyof ConsultFormData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
+    if (submitError) {
+      setSubmitError(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,14 +85,36 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
     if (!validate()) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const response = await fetch('/api/consultations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-    setIsSubmitting(false);
-    setIsSuccess(true);
+      const result = await response.json();
 
-    if (onSuccess) {
-      onSuccess();
+      if (response.ok && result.success) {
+        setSubmittedId(result.data.id);
+        setIsSuccess(true);
+        if (onSuccess) {
+          onSuccess();
+        }
+      } else {
+        if (result.errors) {
+          setErrors(result.errors);
+        }
+        setSubmitError(result.message || '提交失败，请稍后重试');
+      }
+    } catch (error) {
+      console.error('提交表单失败:', error);
+      setSubmitError('网络连接失败，请检查网络后重试');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -103,6 +130,11 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
           <span className="text-industrial-orange-500 font-semibold"> 24小时内 </span>
           与您联系，为您提供免费的方案评估。
         </p>
+        {submittedId && (
+          <div className="text-xs text-steel-400 mb-4">
+            预约编号：<span className="font-mono">#{submittedId.toString().padStart(6, '0')}</span>
+          </div>
+        )}
         <div className="bg-steel-50 rounded-lg p-4 text-left">
           <p className="text-sm text-steel-600 mb-2">
             <span className="font-medium">提交的信息：</span>
@@ -111,11 +143,13 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             <li>公司：{formData.company}</li>
             <li>联系人：{formData.contact}</li>
             <li>手机：{formData.phone}</li>
+            <li>行业：{formData.industry}</li>
           </ul>
         </div>
         <button
           onClick={() => {
             setIsSuccess(false);
+            setSubmittedId(null);
             setFormData({
               company: '',
               contact: '',
@@ -139,6 +173,13 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
       <p className="text-steel-500 text-sm mb-6">
         填写以下信息，我们的自动化专家将为您提供一对一咨询服务
       </p>
+
+      {submitError && (
+        <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-rose-700">{submitError}</p>
+        </div>
+      )}
 
       <div className="space-y-5">
         <div className="grid md:grid-cols-2 gap-5">
@@ -260,12 +301,16 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
               errors.requirement ? 'border-rose-400 bg-rose-50' : 'border-steel-300 hover:border-steel-400'
             }`}
           />
-          {errors.requirement && (
-            <p className="mt-1 text-sm text-rose-500">{errors.requirement}</p>
-          )}
-          <p className="mt-1 text-xs text-steel-400 text-right">
-            {formData.requirement.length} / 500 字
-          </p>
+          <div className="flex justify-between mt-1">
+            {errors.requirement ? (
+              <p className="text-sm text-rose-500">{errors.requirement}</p>
+            ) : (
+              <span />
+            )}
+            <p className="text-xs text-steel-400">
+              {formData.requirement.length} / 500 字
+            </p>
+          </div>
         </div>
 
         <button
